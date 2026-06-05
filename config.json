@@ -1,6 +1,7 @@
 {
   "uiScale": 1,
   "simScale": 1,
+  "slimeTrailToFood": false,
   "grid": {
     "cellSize": 14,
     "borderDepth": 4,

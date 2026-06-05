@@ -81,6 +81,30 @@ class Fields {
     }
   }
 
+  // Like decay() for the trail, but deposits food at the main-grid cell whenever
+  // a trail cell crosses zero — so fading slime trails leave behind food.
+  decayTrailToFood(rate, hue) {
+    const tCols = this.trailCols;
+    const scale = this.trailScale;
+    for (let tr = 0; tr < this.trailRows; tr++) {
+      for (let tc = 0; tc < tCols; tc++) {
+        const i = tr * tCols + tc;
+        if (this.trail[i] === 0) continue;
+        this.trail[i] *= rate;
+        if (this.trail[i] < 0.001) {
+          this.trail[i] = 0;
+          const mc = Math.floor(tc / scale);
+          const mr = Math.floor(tr / scale);
+          if (this.inBounds(mc, mr)) {
+            const mi = this.idx(mc, mr);
+            this.food[mi]    = Math.min(1, this.food[mi] + 0.15);
+            this.foodHue[mi] = hue;
+          }
+        }
+      }
+    }
+  }
+
   // Convert canvas pixel position to the nearest grid cell.
   toGrid(x, y) {
     return {

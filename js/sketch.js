@@ -80,7 +80,14 @@ function draw() {
 
   // Trail: diffuse into neighbors first, then decay — gives spreading blob appearance
   fields.diffuseTrail(config.grid.trailDiffuse ?? 0.25);
-  fields.decay(fields.trail, config.grid.trailDecay ?? 0.97);
+  if (config.slimeTrailToFood) {
+    const hue = slideEngine
+      ? slideEngine.hueForColor(slideEngine.slides[simState.slideIndex]?.actions?.color)
+      : 120;
+    fields.decayTrailToFood(config.grid.trailDecay ?? 0.997, hue);
+  } else {
+    fields.decay(fields.trail, config.grid.trailDecay ?? 0.997);
+  }
 
   if (!simState.paused) {
     tickSugar(fields);

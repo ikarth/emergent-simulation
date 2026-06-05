@@ -161,7 +161,7 @@ Agent based social simulation
 ## Emergent Simulations are abstractions
 
 ---
-<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:12"]} -->
+<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:18"]} -->
 
 ## Emergent Simulations are abstractions
 
@@ -174,12 +174,12 @@ Abstraction: a theoretical or general representation of something. A simulation 
 <!-- And often we don't want them to be. The whole point is to make something safer, or more fun, or to do it more times. -->
 
 ---
-<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:46"]} -->
+<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:76"]} -->
 
 ## Emergent Simulations are metaphors
 
 ---
-<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:48"]} -->
+<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:84"]} -->
 
 "There is no thing-generator. There is only a thing-aboutness generator. [...] If you give me an algorithm, a sine wave or madlibs or tarot cards or GPT3 or tracery, I will generate a mountain for you."
 
@@ -311,11 +311,12 @@ The things that make games work often come from the weird friction and bespoke e
 ## Embrace escaping the metaphor
 
 ---
-<!-- {"jitter": true, "color": "emergence", "enter": ["spawn_sugar:36"], "exit": ["burn_slide_pixels"]} -->
+<!-- {"jitter": true, "color": "emergence", "enter": ["spawn_sugar:36", "spawn_slimes:70"], "exit": ["burn_slide_pixels"]} -->
 
 ## Interesting Emergent Simulation is metaphor taken too far
 
 ---
+<!-- {"jitter": false, "color": "emergence", "enter": ["spawn_slimes:70", "spawn_boids:12"], "exit": ["burn_slide_pixels"]} -->
 ## Isaac Karth
 
 Presenting at UC Davis, June 6 2026

@@ -1,4 +1,6 @@
 {
+  "uiScale": 1,
+  "simScale": 1,
   "grid": {
     "cellSize": 14,
     "borderDepth": 4,

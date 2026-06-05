@@ -217,7 +217,10 @@ class SlideEngine {
   // --- Avoid zone computation ---
 
   updateAvoidZones() {
-    const cs = this.config.grid.cellSize;
+    const cs   = this.config.grid.cellSize;
+    // getBoundingClientRect() returns viewport pixels; divide by simScale to
+    // convert to canvas pixels before mapping to grid cells.
+    const simS = this.config.simScale ?? 1;
     this.simState.avoidZones = [];
 
     const elements = this.contentEl.querySelectorAll('h1, h2, h3, p, ul, li');
@@ -225,10 +228,10 @@ class SlideEngine {
       const rect = el.getBoundingClientRect();
       if (rect.width < 2 || rect.height < 2) continue;
 
-      const col  = Math.max(0, Math.floor(rect.left / cs));
-      const row  = Math.max(0, Math.floor(rect.top / cs));
-      const cols = Math.min(this.fields.cols - col, Math.ceil(rect.width  / cs) + 1);
-      const rows = Math.min(this.fields.rows - row, Math.ceil(rect.height / cs) + 1);
+      const col  = Math.max(0, Math.floor((rect.left   / simS) / cs));
+      const row  = Math.max(0, Math.floor((rect.top    / simS) / cs));
+      const cols = Math.min(this.fields.cols - col, Math.ceil((rect.width  / simS) / cs) + 1);
+      const rows = Math.min(this.fields.rows - row, Math.ceil((rect.height / simS) / cs) + 1);
 
       if (cols > 0 && rows > 0) {
         this.simState.avoidZones.push({ col, row, cols, rows });
@@ -285,7 +288,15 @@ class SlideEngine {
   // Sample an html2canvas-produced canvas into the food field.
   // Dark, opaque pixels become food; brightness and alpha are both factored in.
   // Main food grid feeds agent consumption; imageFood grid stores the high-res pattern.
+  //
+  // html2canvas captures the overlay at its CSS layout size (windowWidth / uiScale).
+  // The field grid lives in canvas space (windowWidth / simScale).
+  // ratio = simScale / uiScale maps field pixel coordinates to image pixel coordinates.
   burnPixelsToFood(canvas, fields, hue) {
+    const simS  = this.config.simScale ?? 1;
+    const uiS   = this.config.uiScale  ?? 1;
+    const ratio = simS / uiS;
+
     const ctx = canvas.getContext('2d');
     const { data, width: imgW } = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -293,9 +304,10 @@ class SlideEngine {
     const cs = fields.cellSize;
     for (let r = 0; r < fields.rows; r++) {
       for (let c = 0; c < fields.cols; c++) {
-        const x0 = c * cs, y0 = r * cs;
-        const x1 = Math.min(x0 + cs, canvas.width);
-        const y1 = Math.min(y0 + cs, canvas.height);
+        const x0 = Math.floor(c * cs * ratio);
+        const y0 = Math.floor(r * cs * ratio);
+        const x1 = Math.min(Math.floor((c + 1) * cs * ratio), canvas.width);
+        const y1 = Math.min(Math.floor((r + 1) * cs * ratio), canvas.height);
         const area = (x1 - x0) * (y1 - y0);
         if (area <= 0) continue;
         let darkness = 0;
@@ -319,9 +331,10 @@ class SlideEngine {
     const ifcs = fields.ifCellSize;
     for (let r = 0; r < fields.ifRows; r++) {
       for (let c = 0; c < fields.ifCols; c++) {
-        const x0 = Math.floor(c * ifcs), y0 = Math.floor(r * ifcs);
-        const x1 = Math.min(Math.ceil((c + 1) * ifcs), canvas.width);
-        const y1 = Math.min(Math.ceil((r + 1) * ifcs), canvas.height);
+        const x0 = Math.floor(c * ifcs * ratio);
+        const y0 = Math.floor(r * ifcs * ratio);
+        const x1 = Math.min(Math.ceil((c + 1) * ifcs * ratio), canvas.width);
+        const y1 = Math.min(Math.ceil((r + 1) * ifcs * ratio), canvas.height);
         if (x1 <= x0 || y1 <= y0) continue;
         let darkness = 0;
         let samples  = 0;

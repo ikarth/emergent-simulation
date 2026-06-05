@@ -29,11 +29,33 @@ function preload() {
 }
 
 function setup() {
-  const cnv = createCanvas(windowWidth, windowHeight);
+  // simScale shrinks the canvas coordinate space and CSS-scales it back up,
+  // making agents, trails, and grid cells appear larger without changing logic.
+  const simS = config.simScale ?? 1;
+  const cnv = createCanvas(
+    Math.floor(windowWidth  / simS),
+    Math.floor(windowHeight / simS)
+  );
   cnv.style('position', 'fixed');
   cnv.style('top', '0');
   cnv.style('left', '0');
   cnv.style('z-index', '0');
+  if (simS !== 1) {
+    cnv.style('transform-origin', 'top left');
+    cnv.style('transform', `scale(${simS})`);
+  }
+
+  // uiScale enlarges the HTML overlay (text, layout) independently.
+  // getBoundingClientRect() returns post-transform viewport coordinates,
+  // so avoid zones still align with where text visually appears on screen.
+  const uiS = config.uiScale ?? 1;
+  if (uiS !== 1) {
+    const overlay = document.getElementById('slide-overlay');
+    overlay.style.transformOrigin = 'top left';
+    overlay.style.transform       = `scale(${uiS})`;
+    overlay.style.width            = (100 / uiS) + '%';
+    overlay.style.height           = (100 / uiS) + '%';
+  }
 
   simState.startTime = millis();
 
@@ -117,7 +139,11 @@ function keyPressed() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  const simS = config.simScale ?? 1;
+  resizeCanvas(
+    Math.floor(windowWidth  / simS),
+    Math.floor(windowHeight / simS)
+  );
   const cs   = config.grid.cellSize;
   const cols = Math.floor(width  / cs);
   const rows = Math.floor(height / cs);

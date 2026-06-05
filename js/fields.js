@@ -4,16 +4,18 @@
 // giving the simulation a chunky, visible resolution.
 
 class Fields {
-  constructor(cols, rows, cellSize, trailScale = 2) {
+  constructor(cols, rows, cellSize, trailScale = 2, imageFoodScale = 2) {
     this.cols = cols;
     this.rows = rows;
     this.cellSize = cellSize;
     const n = cols * rows;
 
-    this.avoid  = new Float32Array(n); // boids steer away from cells > 0
-    this.food   = new Float32Array(n); // boids seek; consumed on contact
-    this.border = new Float32Array(n); // the border frame cells
-    this.foodHue = new Float32Array(n); // hue (0..360) per food cell
+    this.avoid     = new Float32Array(n); // boids steer away from cells > 0
+    this.food      = new Float32Array(n); // boids seek; consumed on contact
+    this.border    = new Float32Array(n); // the border frame cells
+    this.foodHue   = new Float32Array(n); // hue (0..360) per food cell
+    // 0 = fuzzy landscape blob, 1 = crisp image tile (high-res), 2 = crisp black tile
+    this.foodCrisp = new Uint8Array(n);
 
     // Trail field at higher resolution — trailScale × main grid in each dimension
     this.trailScale    = trailScale;
@@ -23,6 +25,14 @@ class Fields {
     const tn           = this.trailCols * this.trailRows;
     this.trail         = new Float32Array(tn);
     this._trailBuf     = new Float32Array(tn); // double-buffer for diffusion
+
+    // Image food at higher resolution — stores pixel-burn pattern for rendering;
+    // main food grid controls agent consumption, this grid controls visual shape.
+    this.ifScale    = imageFoodScale;
+    this.ifCellSize = cellSize / imageFoodScale;
+    this.ifCols     = cols * imageFoodScale;
+    this.ifRows     = rows * imageFoodScale;
+    this.imageFood  = new Float32Array(this.ifCols * this.ifRows);
   }
 
   idx(col, row) {
@@ -55,6 +65,14 @@ class Fields {
     }
   }
 
+  // Clear food, hue, crisp-type, and image-food pattern together.
+  clearFood() {
+    this.food.fill(0);
+    this.foodHue.fill(0);
+    this.foodCrisp.fill(0);
+    this.imageFood.fill(0);
+  }
+
   // Multiply every cell by rate (e.g. 0.99) and zero out near-zero values.
   decay(field, rate) {
     for (let i = 0; i < field.length; i++) {
@@ -77,6 +95,13 @@ class Fields {
       x: (col + 0.5) * this.cellSize,
       y: (row + 0.5) * this.cellSize,
     };
+  }
+
+  // Image-food coordinate helpers (high-res grid for pixel-burn rendering)
+  ifIdx(col, row)      { return row * this.ifCols + col; }
+  ifInBounds(col, row) { return col >= 0 && col < this.ifCols && row >= 0 && row < this.ifRows; }
+  toIfGrid(x, y) {
+    return { col: Math.floor(x / this.ifCellSize), row: Math.floor(y / this.ifCellSize) };
   }
 
   // Trail-specific coordinate helpers (trail grid is denser than the main grid)
@@ -166,12 +191,13 @@ class Fields {
     }
   }
 
-  // Scatter the border cells as food (used by the drop_border action).
+  // Convert all border cells to crisp black food tiles (used by drop_border action).
   burnBorderToFood(hue) {
     for (let i = 0; i < this.border.length; i++) {
-      if (this.border[i] > 0.5 && Math.random() < 0.4) {
-        this.food[i] = Math.max(this.food[i], 0.5 + Math.random() * 0.4);
-        this.foodHue[i] = hue;
+      if (this.border[i] > 0.5) {
+        this.food[i]      = 1.0; // start fully opaque so they appear solid black
+        this.foodHue[i]   = hue;
+        this.foodCrisp[i] = 2; // crisp black tile
       }
     }
   }
@@ -181,40 +207,115 @@ class Fields {
   drawFood() {
     noStroke();
     const cs = this.cellSize;
-    const r = cs * 1.4; // slightly larger than cell for a fuzzy-blob look
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
-        const v = this.food[this.idx(col, row)];
+        const i = this.idx(col, row);
+        const v = this.food[i];
         if (v < 0.01) continue;
-        const hue = this.foodHue[this.idx(col, row)];
-        const px = (col + 0.5) * cs;
-        const py = (row + 0.5) * cs;
-        // Convert HSB(hue, 30%, 60%) to RGB for a desaturated accent color
-        const [red, grn, blu] = hsbToRgb(hue, 30, 60);
-        fill(red, grn, blu, v * 130);
-        ellipse(px, py, r, r);
+        const crisp = this.foodCrisp[i];
+        if (crisp === 2) {
+          // Border burn: crisp black square
+          fill(0, 0, 0, v * 255);
+          rect(col * cs, row * cs, cs, cs);
+        } else if (crisp === 0) {
+          // Landscape food: fuzzy blob (crisp===1 rendered at high-res by drawImageFood)
+          const hue = this.foodHue[i];
+          const px = (col + 0.5) * cs;
+          const py = (row + 0.5) * cs;
+          const [red, grn, blu] = hsbToRgb(hue, 30, 60);
+          fill(red, grn, blu, v * 130);
+          ellipse(px, py, cs * 1.4, cs * 1.4);
+        }
       }
     }
   }
 
   drawTrail() {
-    noStroke();
-    const cs = this.trailCellSize;
+    // Batch cells by alpha bucket so we make O(buckets) ctx.fill() calls instead of
+    // O(cells) — with trailScale=3 that cuts ~200K p5.js draw calls down to ~32/frame.
+    const ctx     = drawingContext;
+    const cs      = this.trailCellSize;
+    const TAU     = Math.PI * 2;
+    const BUCKETS = 16;
+
+    if (!this._drawBuckets) {
+      this._drawBuckets = Array.from({ length: BUCKETS }, () => []);
+    }
+    for (const b of this._drawBuckets) b.length = 0;
+
     for (let row = 0; row < this.trailRows; row++) {
       for (let col = 0; col < this.trailCols; col++) {
         const v = this.trail[this.trailIdx(col, row)];
         if (v < 0.01) continue;
-        const px = (col + 0.5) * cs;
-        const py = (row + 0.5) * cs;
-        // Three concentric layers: tight bright core, mid glow, soft outer haze
-        fill(120, 180, 130, v * 140);
-        ellipse(px, py, cs * 0.8, cs * 0.8);
-        fill(120, 180, 130, v * 50);
-        ellipse(px, py, cs * 1.8, cs * 1.8);
-        fill(120, 180, 130, v * 18);
-        ellipse(px, py, cs * 3.2, cs * 3.2);
+        const b = this._drawBuckets[Math.min(BUCKETS - 1, Math.floor(v * BUCKETS))];
+        b.push(col, row);
       }
     }
+
+    const rad1 = cs * 0.5;  // inner core
+    const rad2 = cs * 1.1;  // outer glow
+
+    ctx.save();
+    for (let pass = 0; pass < 2; pass++) {
+      const rad = pass === 0 ? rad1 : rad2;
+      for (let bi = 0; bi < BUCKETS; bi++) {
+        const bucket = this._drawBuckets[bi];
+        if (bucket.length === 0) continue;
+        const v = (bi + 0.5) / BUCKETS;
+        ctx.fillStyle = `rgba(120,180,130,${(pass === 0 ? v * 0.55 : v * 0.15).toFixed(3)})`;
+        ctx.beginPath();
+        for (let k = 0; k < bucket.length; k += 2) {
+          const px = (bucket[k]     + 0.5) * cs;
+          const py = (bucket[k + 1] + 0.5) * cs;
+          ctx.moveTo(px + rad, py);
+          ctx.arc(px, py, rad, 0, TAU);
+        }
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // Render pixel-burned slide content at high resolution using batched rect paths.
+  // imageFood stores the initial darkness pattern; food[] controls opacity as agents eat.
+  drawImageFood() {
+    const ctx     = drawingContext;
+    const cs      = this.ifCellSize;
+    const BUCKETS = 16;
+
+    if (!this._ifDrawBuckets) {
+      this._ifDrawBuckets = Array.from({ length: BUCKETS }, () => []);
+    }
+    for (const b of this._ifDrawBuckets) b.length = 0;
+
+    for (let row = 0; row < this.ifRows; row++) {
+      for (let col = 0; col < this.ifCols; col++) {
+        const ifv = this.imageFood[this.ifIdx(col, row)];
+        if (ifv < 0.01) continue;
+        const mc = Math.floor(col / this.ifScale);
+        const mr = Math.floor(row / this.ifScale);
+        if (!this.inBounds(mc, mr)) continue;
+        const mv = this.food[this.idx(mc, mr)];
+        if (mv < 0.01) continue;
+        const v  = ifv * mv;
+        if (v < 0.005) continue;
+        this._ifDrawBuckets[Math.min(BUCKETS - 1, Math.floor(v * BUCKETS))].push(col, row);
+      }
+    }
+
+    ctx.save();
+    for (let bi = 0; bi < BUCKETS; bi++) {
+      const bucket = this._ifDrawBuckets[bi];
+      if (bucket.length === 0) continue;
+      const v = (bi + 0.5) / BUCKETS;
+      ctx.fillStyle = `rgba(30,30,30,${(v * 0.9).toFixed(3)})`;
+      ctx.beginPath();
+      for (let k = 0; k < bucket.length; k += 2) {
+        ctx.rect(bucket[k] * cs, bucket[k + 1] * cs, cs, cs);
+      }
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   drawBorder() {

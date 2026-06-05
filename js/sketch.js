@@ -41,7 +41,7 @@ function setup() {
   const cols = Math.floor(width  / cs);
   const rows = Math.floor(height / cs);
 
-  fields = new Fields(cols, rows, cs, config.grid.trailScale ?? 2);
+  fields = new Fields(cols, rows, cs, config.grid.trailScale ?? 2, config.grid.imageFoodScale ?? 2);
   fields.initBorder(config.grid.borderDepth);
   fields.rebuildAvoid(simState);
 
@@ -74,6 +74,7 @@ function draw() {
     drawingContext.rect(b.x, b.y, b.w, b.h);
     drawingContext.clip();
     fields.drawFood();
+    fields.drawImageFood();
     fields.drawTrail();
     drawAgents();
     drawingContext.restore();
@@ -92,6 +93,7 @@ function draw() {
     rect(b.x, b.y, b.w, b.h);
   } else {
     fields.drawFood();
+    fields.drawImageFood();
     fields.drawTrail();
     drawAgents();
   }
@@ -119,7 +121,7 @@ function windowResized() {
   const cs   = config.grid.cellSize;
   const cols = Math.floor(width  / cs);
   const rows = Math.floor(height / cs);
-  fields = new Fields(cols, rows, cs, config.grid.trailScale ?? 2);
+  fields = new Fields(cols, rows, cs, config.grid.trailScale ?? 2, config.grid.imageFoodScale ?? 2);
   fields.initBorder(config.grid.borderDepth);
   fields.rebuildAvoid(simState);
   // Re-measure text positions for the current slide
@@ -230,7 +232,7 @@ function registerActions() {
   registerAction('remove_sugar', () => {
     clearAgents('sugar');
     clearSugarLandscape();
-    fields.food.fill(0);
+    fields.clearFood();
   });
 
   // Burn the current slide's captured pixels into the food field.
@@ -257,7 +259,7 @@ function registerActions() {
   // Stops regrowth and clears the food field; agents die naturally as they run out.
   registerAction('clear_food', () => {
     clearSugarLandscape();
-    fields.food.fill(0);
+    fields.clearFood();
   });
 
   registerAction('toggle_boid_vectors', (mode = 'all') => {

@@ -4,7 +4,8 @@
     "borderDepth": 4,
     "trailScale": 2,
     "trailDiffuse": 0.125,
-    "trailDecay": 0.9997
+    "trailDecay": 0.9997,
+    "imageFoodScale": 2
   },
   "hotkeys": {
     "next":          ["ArrowRight", "d", "D"],

@@ -1,13 +1,16 @@
 ---
 marp: true
 ---
+<!-- {"exit": ["burn_to_food"], "color": "emergence"} -->
 # Why You Like Emergent Simulation
 
 ---
+<!-- {"exit": ["burn_to_food"], "color": "emergence"} -->
 
 # Why **I** Like Emergent Simulation
 
 ---
+<!-- {"exit": ["burn_to_food"], "color": "emergence"} -->
 ## What is emergent simulation anyway?
 
 ---
@@ -148,7 +151,7 @@ Agent based social simulation
 ---
 <!-- {"color": "emergence", "enter": ["spawn_boids:36"], "exit": ["boids_leave"]} -->
 
-## Emergent Simulations: Comprehensive Serendipity
+## Emergent Simulations: **Comprehensive Serendipity**
 
 * Comprehensible: tend to have individual rules that are easy to understand
 * Serendipity: but have complex effects that you would never anticipate
@@ -158,7 +161,7 @@ Agent based social simulation
 ## Simulations are abstractions
 
 ---
-<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:3"]} -->
+<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:6"]} -->
 
 ## Simulations are abstractions
 
@@ -171,7 +174,7 @@ Abstraction: a theoretical or general representation of something. A simulation 
 <!-- And often we don't want them to be. The whole point is to make something safer, or more fun, or to do it more times. -->
 
 ---
-<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:3"]} -->
+<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:18"]} -->
 
 "There is no thing-generator. There is only a thing-aboutness generator. [...] If you give me an algorithm, a sine wave or madlibs or tarot cards or GPT3 or tracery, I will generate a mountain for you."
 
@@ -183,7 +186,7 @@ Abstraction: a theoretical or general representation of something. A simulation 
 
 
 ---
-<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:30"]} -->
+<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:30"], "exit": ["burn_to_food"]} -->
 
 ## Emergent Simulations are their own thing
 
@@ -208,7 +211,7 @@ A city in SimCity only loosely resembles a real city, but it is an exact realiza
 
 
 ---
-<!-- {"section": "Poetics of Emergent Simulations", "color": "simulation", "enter": ["spawn_sugar:20"]} -->
+<!-- {"section": "Poetics of Emergent Simulations", "color": "simulation", "enter": ["spawn_sugar:30"]} -->
 
 ## Combining simulations
 
@@ -259,9 +262,9 @@ The things that make games work often come from the weird friction and bespoke e
 ## Sandboxlets.
 
 ---
-<!-- {"color": "simulation", "enter": ["hide_box", "spawn_boids:6", "spawn_slimes:170"]} -->
+<!-- {"color": "simulation", "enter": ["hide_box", "spawn_boids:6", "spawn_slimes:170", "spawn_sugar:30"], "exit": ["remove_sugar", "burn_to_food"]} -->
 
-## Why does Dwarf Fortress get away with being so complicated?
+## Why does **Dwarf Fortress** get away with being so complicated?
 
 <!-- Dwarf Fortress builds systems on top of systems. The reason why it works is that it leans into the systems. -->
 
@@ -270,12 +273,13 @@ The things that make games work often come from the weird friction and bespoke e
 <!-- But mostly you want to be open to the idea that some things don't need to be emergent simulations. -->
 
 ---
-<!-- {"color": "emergence", "enter": ["hide_box", "remove_predators", "remove_boids", "remove_slimes"]} -->
+<!-- {"color": "emergence", "enter": ["hide_box", "remove_predators", "remove_boids", "remove_slimes", "remove_sugar_agents"]} -->
 
 # Why I Like Emergent Simulations
 
 * Comprehensible Serendipity
-* Can be used for rhetorical effect
+* They're interesting in themselves
+* They can be applied as symbols
 * A metaphor that escaped containment
 
 ---
@@ -284,7 +288,8 @@ The things that make games work often come from the weird friction and bespoke e
 # Why **You** Like Emergent Simulations
 
 * Comprehensible Serendipity
-* Can be used for rhetorical effect
+* They're interesting in themselves
+* They can be applied as symbols
 * A metaphor that escaped containment
 
 
@@ -294,12 +299,12 @@ The things that make games work often come from the weird friction and bespoke e
 ## Simulation starts as metaphor
 
 ---
-<!-- {"jitter": true, "color": "emergence", "enter": ["spawn_boids:20", "spawn_slimes:170"], "exit": ["burn_slide_pixels"]} -->
+<!-- {"jitter": true, "color": "emergence", "enter": ["spawn_boids:10", "spawn_slimes:70"], "exit": ["burn_slide_pixels"]} -->
 
 ## Pushes through the metaphor
 
 ---
-<!-- {"jitter": true, "color": "emergence", "enter": ["drop_border"], "exit": ["burn_slide_pixels"]} -->
+<!-- {"jitter": true, "color": "emergence", "enter": ["drop_border", "spawn_slimes:70"], "exit": ["burn_slide_pixels"]} -->
 
 ## Embrace escaping the metaphor
 

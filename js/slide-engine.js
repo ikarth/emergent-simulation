@@ -203,7 +203,7 @@ class SlideEngine {
     clearSugarLandscape();
     boidRules.separation = true; boidRules.alignment = true; boidRules.cohesion = true; boidRules.avoidance = true;
     boidVectorMode = 'off';
-    this.fields.food.fill(0);
+    this.fields.clearFood();
     this.fields.trail.fill(0);
     this.fields.initBorder(this.config.grid.borderDepth);
     this.simState.borderDropped = false;
@@ -261,8 +261,8 @@ class SlideEngine {
   _titleOffset(index) {
     const h = Math.imul(index + 1, 2654435761) >>> 0; // Knuth multiplicative hash
     return {
-      x: (h % 61) - 30,          // -30..+30 px
-      y: ((h >>> 8) % 41) - 20,  // -20..+20 px
+      x: (h % 241) - 120,          // -120..+120 px
+      y: ((h >>> 8) % 161) - 80,   // -80..+80 px
     };
   }
 
@@ -284,11 +284,13 @@ class SlideEngine {
 
   // Sample an html2canvas-produced canvas into the food field.
   // Dark, opaque pixels become food; brightness and alpha are both factored in.
+  // Main food grid feeds agent consumption; imageFood grid stores the high-res pattern.
   burnPixelsToFood(canvas, fields, hue) {
     const ctx = canvas.getContext('2d');
     const { data, width: imgW } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const cs = fields.cellSize;
 
+    // Low-res pass: write to main food grid for agent consumption
+    const cs = fields.cellSize;
     for (let r = 0; r < fields.rows; r++) {
       for (let c = 0; c < fields.cols; c++) {
         const x0 = c * cs, y0 = r * cs;
@@ -296,22 +298,42 @@ class SlideEngine {
         const y1 = Math.min(y0 + cs, canvas.height);
         const area = (x1 - x0) * (y1 - y0);
         if (area <= 0) continue;
-
         let darkness = 0;
         for (let py = y0; py < y1; py++) {
           for (let px = x0; px < x1; px++) {
             const i = (py * imgW + px) * 4;
-            const a   = data[i + 3] / 255;
-            const bri = (data[i] + data[i + 1] + data[i + 2]) / (3 * 255);
-            darkness += a * (1 - bri);
+            darkness += (data[i + 3] / 255) * (1 - (data[i] + data[i + 1] + data[i + 2]) / (3 * 255));
           }
         }
         darkness /= area;
-
         if (darkness > 0.05) {
           const idx = fields.idx(c, r);
-          fields.food[idx]    = Math.max(fields.food[idx], darkness);
-          fields.foodHue[idx] = hue;
+          fields.food[idx]      = Math.max(fields.food[idx], darkness);
+          fields.foodHue[idx]   = hue;
+          fields.foodCrisp[idx] = 1; // skip in drawFood; drawImageFood renders at high-res
+        }
+      }
+    }
+
+    // High-res pass: write imageFood pattern for drawImageFood rendering
+    const ifcs = fields.ifCellSize;
+    for (let r = 0; r < fields.ifRows; r++) {
+      for (let c = 0; c < fields.ifCols; c++) {
+        const x0 = Math.floor(c * ifcs), y0 = Math.floor(r * ifcs);
+        const x1 = Math.min(Math.ceil((c + 1) * ifcs), canvas.width);
+        const y1 = Math.min(Math.ceil((r + 1) * ifcs), canvas.height);
+        if (x1 <= x0 || y1 <= y0) continue;
+        let darkness = 0;
+        let samples  = 0;
+        for (let py = y0; py < y1; py++) {
+          for (let px = x0; px < x1; px++) {
+            const i = (py * imgW + px) * 4;
+            darkness += (data[i + 3] / 255) * (1 - (data[i] + data[i + 1] + data[i + 2]) / (3 * 255));
+            samples++;
+          }
+        }
+        if (samples > 0 && darkness / samples > 0.05) {
+          fields.imageFood[fields.ifIdx(c, r)] = darkness / samples;
         }
       }
     }

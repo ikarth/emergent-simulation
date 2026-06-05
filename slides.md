@@ -158,12 +158,12 @@ Agent based social simulation
 
 ---
 <!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:1"]} -->
-## Simulations are abstractions
+## Emergent Simulations are abstractions
 
 ---
 <!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:6"]} -->
 
-## Simulations are abstractions
+## Emergent Simulations are abstractions
 
 Abstraction: a theoretical or general representation of something. A simulation summarizes the thing it represents.
 
@@ -172,6 +172,11 @@ Abstraction: a theoretical or general representation of something. A simulation 
 <!-- ## Simulations are not the thing they are modeling -->
 
 <!-- And often we don't want them to be. The whole point is to make something safer, or more fun, or to do it more times. -->
+
+---
+<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:26"]} -->
+
+## Emergent Simulations are metaphors
 
 ---
 <!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:18"]} -->
@@ -184,6 +189,10 @@ Abstraction: a theoretical or general representation of something. A simulation 
 
 <!-- In procedural generation we sometimes make a **teleological distinction** between generators. -->
 
+---
+<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:26"]} -->
+
+## Simulations are metaphors
 
 ---
 <!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:30"], "exit": ["burn_to_food"]} -->
@@ -278,8 +287,7 @@ The things that make games work often come from the weird friction and bespoke e
 # Why I Like Emergent Simulations
 
 * Comprehensible Serendipity
-* They're interesting in themselves
-* They can be applied as symbols
+* interesting in themselves & can be applied as symbols
 * A metaphor that escaped containment
 
 ---
@@ -288,8 +296,7 @@ The things that make games work often come from the weird friction and bespoke e
 # Why **You** Like Emergent Simulations
 
 * Comprehensible Serendipity
-* They're interesting in themselves
-* They can be applied as symbols
+* interesting in themselves & can be applied as symbols
 * A metaphor that escaped containment
 
 

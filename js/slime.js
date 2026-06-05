@@ -13,28 +13,35 @@ const SLIME = {
 };
 
 function slimeUpdate(agent, fields, agents) {
-  // --- Sense trail field at three angles ---
-  const frontVal = senseTrailAt(agent, fields, 0);
-  const leftVal  = senseTrailAt(agent, fields, -SLIME.senseAngle);
-  const rightVal = senseTrailAt(agent, fields,  SLIME.senseAngle);
+  // If currently inside an avoid zone, don't steer — just keep going straight.
+  // The canvas wrap will let it escape; random turns would just keep it trapped.
+  const {col: curCol, row: curRow} = fields.toGrid(agent.x, agent.y);
+  const inAvoid = fields.get(fields.avoid, curCol, curRow) > 0;
 
-  // Also check avoid field ahead — turn away from avoid cells
-  const frontAvoid = senseAvoidAt(agent, fields, 0);
+  if (!inAvoid) {
+    // --- Sense trail field at three angles ---
+    const frontVal = senseTrailAt(agent, fields, 0);
+    const leftVal  = senseTrailAt(agent, fields, -SLIME.senseAngle);
+    const rightVal = senseTrailAt(agent, fields,  SLIME.senseAngle);
 
-  if (frontAvoid > 0) {
-    // Blocked: pick a random direction to try
-    agent.angle += (Math.random() - 0.5) * Math.PI;
-  } else if (frontVal >= leftVal && frontVal >= rightVal) {
-    // Continue straight, maybe a small random jitter
-    if (Math.random() < SLIME.randomTurnChance) {
+    // Also check avoid field ahead — turn away from avoid cells
+    const frontAvoid = senseAvoidAt(agent, fields, 0);
+
+    if (frontAvoid > 0) {
+      // Blocked: pick a random direction to try
+      agent.angle += (Math.random() - 0.5) * Math.PI;
+    } else if (frontVal >= leftVal && frontVal >= rightVal) {
+      // Continue straight, maybe a small random jitter
+      if (Math.random() < SLIME.randomTurnChance) {
+        agent.angle += (Math.random() - 0.5) * SLIME.turnSpeed;
+      }
+    } else if (leftVal > rightVal) {
+      agent.angle -= SLIME.turnSpeed * Math.random();
+    } else if (rightVal > leftVal) {
+      agent.angle += SLIME.turnSpeed * Math.random();
+    } else {
       agent.angle += (Math.random() - 0.5) * SLIME.turnSpeed;
     }
-  } else if (leftVal > rightVal) {
-    agent.angle -= SLIME.turnSpeed * Math.random();
-  } else if (rightVal > leftVal) {
-    agent.angle += SLIME.turnSpeed * Math.random();
-  } else {
-    agent.angle += (Math.random() - 0.5) * SLIME.turnSpeed;
   }
 
   // --- Move ---

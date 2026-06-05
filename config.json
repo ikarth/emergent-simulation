@@ -1,0 +1,26 @@
+{
+  "grid": {
+    "cellSize": 14,
+    "borderDepth": 4,
+    "trailScale": 2,
+    "trailDiffuse": 0.125,
+    "trailDecay": 0.9997
+  },
+  "hotkeys": {
+    "next":          ["ArrowRight", "d", "D"],
+    "prev":          ["ArrowLeft",  "a", "A"],
+    "restart":       ["r", "R"],
+    "toggleSim":     ["x", "X"],
+    "toggleOutline": ["o", "O"]
+  },
+  "palette": {
+    "background": [245, 245, 240],
+    "text":       [42,  42,  42],
+    "accentHue": {
+      "simulation":  210,
+      "abstraction":  30,
+      "emergence":   120,
+      "rhetoric":    280
+    }
+  }
+}

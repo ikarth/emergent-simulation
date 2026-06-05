@@ -5,8 +5,8 @@
     "cellSize": 14,
     "borderDepth": 4,
     "trailScale": 2,
-    "trailDiffuse": 0.125,
-    "trailDecay": 0.9997,
+    "trailDiffuse": 0.05125,
+    "trailDecay": 0.997,
     "imageFoodScale": 2
   },
   "hotkeys": {

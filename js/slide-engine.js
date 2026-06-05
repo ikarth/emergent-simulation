@@ -289,16 +289,16 @@ class SlideEngine {
   // Dark, opaque pixels become food; brightness and alpha are both factored in.
   // Main food grid feeds agent consumption; imageFood grid stores the high-res pattern.
   //
-  // html2canvas captures the overlay at its CSS layout size (windowWidth / uiScale).
-  // The field grid lives in canvas space (windowWidth / simScale).
-  // ratio = simScale / uiScale maps field pixel coordinates to image pixel coordinates.
+  // html2canvas may capture at viewport dimensions or at the overlay's CSS layout
+  // dimensions depending on positioning and version — so we compute the sampling
+  // ratio directly from the actual canvas size vs the field grid extent, rather than
+  // assuming anything about how html2canvas handled the transform/scale.
   burnPixelsToFood(canvas, fields, hue) {
-    const simS  = this.config.simScale ?? 1;
-    const uiS   = this.config.uiScale  ?? 1;
-    const ratio = simS / uiS;
-
     const ctx = canvas.getContext('2d');
     const { data, width: imgW } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // image pixels per canvas pixel — derived from actual captured dimensions.
+    const ratio = canvas.width / (fields.cols * fields.cellSize);
 
     // Low-res pass: write to main food grid for agent consumption
     const cs = fields.cellSize;

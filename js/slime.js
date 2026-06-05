@@ -4,12 +4,14 @@
 // other slimes — producing the characteristic network-forming behavior.
 
 const SLIME = {
-  speed:          1.7,  // pixels per frame
-  turnSpeed:      0.35, // max radians to turn per frame
-  senseAngle:     0.5,  // radians offset for left/right sensors
-  senseDist:      18,   // pixels ahead that sensors sample
-  trailDeposit:   0.5,  // how much trail left per frame
-  randomTurnChance: 0.05, // probability of a random turn each frame
+  speed:            1.7,              // pixels per frame
+  turnSpeed:        0.35,             // max radians to turn per frame
+  senseAngle:       0.5,              // radians offset for left/right sensors
+  senseDist:        18,               // pixels ahead that sensors sample
+  trailDeposit:     0.5,              // how much trail left per frame
+  randomTurnChance: 0.05,             // probability of a random turn each frame
+  barrierTurnMax:   Math.PI * 2 / 3, // 120° — max turn when blocked by a barrier
+  barrierTurnStep:  Math.PI / 12,    // 15° sweep increments when searching for clear heading
 };
 
 function slimeUpdate(agent, fields, agents) {
@@ -28,8 +30,15 @@ function slimeUpdate(agent, fields, agents) {
     const frontAvoid = senseAvoidAt(agent, fields, 0);
 
     if (frontAvoid > 0) {
-      // Blocked: pick a random direction to try
-      agent.angle += (Math.random() - 0.5) * Math.PI;
+      // Sweep left and right in 15° steps up to 120°; take the first clear heading.
+      // Randomise which side we check first to avoid a systematic left-turn bias.
+      const sign = Math.random() < 0.5 ? 1 : -1;
+      let turned = false;
+      for (let d = SLIME.barrierTurnStep; d <= SLIME.barrierTurnMax + 0.001; d += SLIME.barrierTurnStep) {
+        if (senseAvoidAt(agent, fields,  sign * d) === 0) { agent.angle +=  sign * d; turned = true; break; }
+        if (senseAvoidAt(agent, fields, -sign * d) === 0) { agent.angle += -sign * d; turned = true; break; }
+      }
+      if (!turned) agent.angle += sign * SLIME.barrierTurnMax;
     } else if (frontVal >= leftVal && frontVal >= rightVal) {
       // Continue straight, maybe a small random jitter
       if (Math.random() < SLIME.randomTurnChance) {

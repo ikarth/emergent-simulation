@@ -161,7 +161,7 @@ Agent based social simulation
 ## Emergent Simulations are abstractions
 
 ---
-<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:6"]} -->
+<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:12"]} -->
 
 ## Emergent Simulations are abstractions
 
@@ -174,12 +174,12 @@ Abstraction: a theoretical or general representation of something. A simulation 
 <!-- And often we don't want them to be. The whole point is to make something safer, or more fun, or to do it more times. -->
 
 ---
-<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:26"]} -->
+<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:46"]} -->
 
 ## Emergent Simulations are metaphors
 
 ---
-<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:18"]} -->
+<!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:48"]} -->
 
 "There is no thing-generator. There is only a thing-aboutness generator. [...] If you give me an algorithm, a sine wave or madlibs or tarot cards or GPT3 or tracery, I will generate a mountain for you."
 
@@ -188,11 +188,6 @@ Abstraction: a theoretical or general representation of something. A simulation 
 > Kate Compton. 2022. Personal communication.
 
 <!-- In procedural generation we sometimes make a **teleological distinction** between generators. -->
-
----
-<!-- {"section": "Simulations are Abstractions", "color": "abstraction", "enter": ["hide_box", "spawn_slimes:26"]} -->
-
-## Simulations are metaphors
 
 ---
 <!-- {"color": "abstraction", "enter": ["hide_box", "spawn_slimes:30"], "exit": ["burn_to_food"]} -->
